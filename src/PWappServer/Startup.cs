@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PWappServer.Hubs;
 using PWappServer.Models;
-
+using System;
+using WebSocketManager;
 
 namespace PWappServer
 {
@@ -93,12 +95,15 @@ namespace PWappServer
                  .AddInMemoryClients(Config.GetClients())
                  .AddAspNetIdentity<ApplicationUser>(); // IdentityServer4.AspNetIdentity.
 
+            services.AddWebSocketManager();
+
+
             // Add framework services.
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext _context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext _context, IServiceProvider serviceProvider)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -114,6 +119,11 @@ namespace PWappServer
 
                 RequireHttpsMetadata = false
             });
+
+            app.UseWebSockets();
+
+            //app.MapWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
+            app.MapWebSocketManager("/test", serviceProvider.GetService<TestMessageHandler>());
 
             app.UseMvc();
 

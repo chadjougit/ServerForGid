@@ -11,6 +11,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using IdentityModel;
 using Newtonsoft.Json;
+using PWappServer.Hubs;
 //using Microsoft.Data.Entity;
 
 
@@ -23,6 +24,13 @@ namespace PWappServer.Controllers
     [Route("api/[controller]")]
     public class IdentityController : Controller
     {
+
+        private TestMessageHandler _notificationsMessageHandler { get; set; }
+
+
+
+
+
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
  
@@ -33,12 +41,13 @@ namespace PWappServer.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILoggerFactory loggerFactory,
-            ApplicationDbContext context)
+            ApplicationDbContext context, TestMessageHandler notificationsMessageHandler)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = loggerFactory.CreateLogger<IdentityController>();
             _context = context;
+            _notificationsMessageHandler = notificationsMessageHandler;
         }
 
         /// <summary>
