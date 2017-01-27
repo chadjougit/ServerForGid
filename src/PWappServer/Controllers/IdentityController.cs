@@ -106,8 +106,7 @@ namespace PWappServer.Controllers
             
 
             var currentuser = await GetCurrentUserAsync();
-            StaticClass.Session_Start(currentuser.UserName);
-
+         
 
 
 
@@ -126,15 +125,17 @@ namespace PWappServer.Controllers
         [HttpPost("GetCurrentUserData")]
         public async Task<IActionResult> GetCurrentUserData([FromBody]string WebsocketId)
         {
+            var currentuser = await GetCurrentUserAsync();
             //in case of logging
             if (WebsocketId != "empty")
             {
-                StaticClass.Session_Start(WebsocketId);
+                ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.Name, ConnectionId = WebsocketId };
+                StaticClass.Session_Start(newConnectionInfo);
             }
 
 
-            var currentuser = await GetCurrentUserAsync();
-            StaticClass.Session_Start(currentuser.UserName);
+            
+        
 
 
 
