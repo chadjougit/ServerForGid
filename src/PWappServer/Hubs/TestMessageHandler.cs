@@ -35,6 +35,11 @@ namespace PWappServer.Hubs
             await InvokeClientMethodToAllAsync("receiveMessage", socketId, message);
         }
 
+        public async Task SendMessageToId(string socketId, string message)
+        {
+            await InvokeClientMethodAsync(socketId, "receiveMessage", message);
+        }
+
         public override async Task OnDisconnected(WebSocket socket)
         {
             var socketId = WebSocketConnectionManager.GetId(socket);

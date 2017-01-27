@@ -222,7 +222,7 @@ namespace PWappServer.Controllers
             foreach (var recivierId in reciveirIds)
             {
 
-                await _notificationsMessageHandler.SendMessage(recivierId.ConnectionId, "booooong! MANY COOOOME");
+                await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "booooong! MANY COOOOME");
 
             }
 
