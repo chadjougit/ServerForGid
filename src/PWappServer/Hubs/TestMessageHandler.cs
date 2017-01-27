@@ -46,6 +46,24 @@ namespace PWappServer.Hubs
                 MessageType = MessageType.Text,
                 Data = $"{socketId} disconnected"
             };
+
+            StaticClass.Sessions
+    .RemoveAll(a => a.ConnectionId == socketId);
+
+            
+
+
+
+            var reciveirId = StaticClass.Sessions.Where(u => u.UserName == socketId);
+
+            //   StaticClass.Sessions.RemoveAt(ConnectionInfo.(x => thingy));
+
+            /*
+            var index = StaticClass.Sessions.IndexOf("VesselId");
+            if (index > -1)
+                StaticClass.Sessions.RemoveAt(reciveirId[0]);
+                */
+
             await SendMessageToAllAsync(message);
 
          //   await WebSocketConnectionManager.RemoveSocket(socketId);
