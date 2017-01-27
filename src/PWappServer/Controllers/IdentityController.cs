@@ -129,7 +129,7 @@ namespace PWappServer.Controllers
             //in case of logging
             if (WebsocketId != "empty")
             {
-                ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.Name, ConnectionId = WebsocketId };
+                ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.UserName, ConnectionId = WebsocketId };
                 StaticClass.Session_Start(newConnectionInfo);
             }
 
@@ -217,10 +217,16 @@ namespace PWappServer.Controllers
             await _userManager.UpdateAsync(Currentuser);
 
 
+            var reciveirIds = StaticClass.Sessions.Where(u => u.UserName == user.UserName);
+
+            foreach (var recivierId in reciveirIds)
+            {
+
+                await _notificationsMessageHandler.SendMessage(recivierId.ConnectionId, "booooong! MANY COOOOME");
+
+            }
 
 
-
-           
             _context.SaveChanges();
             _userManager.Dispose();
             _context.Dispose();

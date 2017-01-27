@@ -27,7 +27,7 @@ namespace PWappServer.Hubs
 
             await SendMessageToAllAsync(message);
 
-            await SendMessageToAllAsync(message);
+           
         }
 
         public async Task SendMessage(string socketId, string message)
