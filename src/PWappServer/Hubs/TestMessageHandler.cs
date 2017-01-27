@@ -47,6 +47,8 @@ namespace PWappServer.Hubs
                 Data = $"{socketId} disconnected"
             };
             await SendMessageToAllAsync(message);
+
+         //   await WebSocketConnectionManager.RemoveSocket(socketId);
         }
     }
 }

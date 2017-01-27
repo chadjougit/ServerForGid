@@ -120,6 +120,37 @@ namespace PWappServer.Controllers
         }
 
 
+
+        
+
+        [HttpPost("GetCurrentUserData")]
+        public async Task<IActionResult> GetCurrentUserData([FromBody]string WebsocketId)
+        {
+            //in case of logging
+            if (WebsocketId != "empty")
+            {
+                StaticClass.Session_Start(WebsocketId);
+            }
+
+
+            var currentuser = await GetCurrentUserAsync();
+            StaticClass.Session_Start(currentuser.UserName);
+
+
+
+
+            DateTime saveUtcNow = DateTime.UtcNow;
+
+            var utc = DateTime.UtcNow;
+
+
+            return new JsonResult(saveUtcNow);
+        }
+
+
+
+
+
         [HttpGet("GetAmount")]
         public async Task<IActionResult> GetAmount()
         {
