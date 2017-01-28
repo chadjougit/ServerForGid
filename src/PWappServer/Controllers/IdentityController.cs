@@ -134,18 +134,27 @@ namespace PWappServer.Controllers
             }
 
 
-            
-        
+            List<Transaction> trans = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
+
+            //   trans.ForEach(x => );
+            //   trans = trans.ForEach(x => 500); 
 
 
+            var qry = from e in trans
+                      let qryq = (e.Amount = 500)
+                      select qryq;
 
+            trans = trans.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
+            //  currentuser.PW
+            //    trans = trans.Where(u => (currentuser.Id == u.ApplicationUserId)).Select(c => { c.Amount = c.Amount * -1; return c; }).ToList();
 
-            DateTime saveUtcNow = DateTime.UtcNow;
+            //Where(u => (currentuser.Id == u.ApplicationUserId));
 
-            var utc = DateTime.UtcNow;
+            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = trans };
 
+            var res = JsonConvert.SerializeObject(currentUserData);
 
-            return new JsonResult(saveUtcNow);
+            return new JsonResult(res);
         }
 
 
