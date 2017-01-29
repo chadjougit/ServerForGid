@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using IdentityModel;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using PWappServer.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using IdentityModel;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PWappServer.Hubs;
+using PWappServer.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
 //using Microsoft.Data.Entity;
-
-
-
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,16 +21,11 @@ namespace PWappServer.Controllers
     [Route("api/[controller]")]
     public class IdentityController : Controller
     {
-
         private TestMessageHandler _notificationsMessageHandler { get; set; }
-
-
-
-
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
- 
+
         private readonly ILogger _logger;
         private readonly ApplicationDbContext _context;
 
@@ -51,77 +43,12 @@ namespace PWappServer.Controllers
         }
 
         /// <summary>
-        /// Gets all the users (user role).
+        /// отдает информацию о Ammount и связанных Transactions данного пользователя
+        /// при первом использовании необходимо получить текущий WebsocketId, чтоб его записать
+        /// в список с сессиями вебсокетов
         /// </summary>
-        /// <returns>Returns all the users</returns>
-        // GET api/identity/GetAll
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
-        {
-            var claim = new Claim("role", "administrator");
-
-            var user = await GetCurrentUserAsync();
-
-            var users = await _userManager.GetUsersForClaimAsync(claim);
-
-            return new JsonResult(user);
-        }
-
-
-        [HttpGet("GetTransactions")]
-        public async Task<IActionResult> GetTransactions()
-        {
-            var currentuser = await GetCurrentUserAsync();
-
-            List<Transaction> trans =  (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername) )).ToList() ;
-
-            //   trans.ForEach(x => );
-            //   trans = trans.ForEach(x => 500); 
-
-
-            var qry = from e in trans
-                      let qryq = (e.Amount = 500)
-                      select qryq;
-
-            trans = trans.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
-
-        //    trans = trans.Where(u => (currentuser.Id == u.ApplicationUserId)).Select(c => { c.Amount = c.Amount * -1; return c; }).ToList();
-
-            //Where(u => (currentuser.Id == u.ApplicationUserId));
-
-
-            var res = JsonConvert.SerializeObject(trans);
-
-
-
-
-            return new JsonResult(res);
-        }
-
-      
-
-        [HttpGet("GetTime")]
-        public async Task<IActionResult> GetTime()
-        {
-            
-
-            var currentuser = await GetCurrentUserAsync();
-         
-
-
-
-            DateTime saveUtcNow = DateTime.UtcNow;
-
-            var utc = DateTime.UtcNow;
-
-
-            return new JsonResult(saveUtcNow);
-        }
-
-
-
-        
-
+        /// <param name="WebsocketId"></param>
+        /// <returns></returns>
         [HttpPost("GetCurrentUserData")]
         public async Task<IActionResult> GetCurrentUserData([FromBody]string WebsocketId)
         {
@@ -130,55 +57,28 @@ namespace PWappServer.Controllers
             if (WebsocketId != "empty")
             {
                 ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.UserName, ConnectionId = WebsocketId };
-                StaticClass.Session_Start(newConnectionInfo);
+                WebSocketSessions.Session_Start(newConnectionInfo);
             }
 
-
-            List<Transaction> trans = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
-
-            //   trans.ForEach(x => );
-            //   trans = trans.ForEach(x => 500); 
-
-
-            var qry = from e in trans
+            List<Transaction> transactions = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
+            /*
+            var qry = from e in transactions
                       let qryq = (e.Amount = 500)
                       select qryq;
+                      */
+            transactions = transactions.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
 
-            trans = trans.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
-            //  currentuser.PW
-            //    trans = trans.Where(u => (currentuser.Id == u.ApplicationUserId)).Select(c => { c.Amount = c.Amount * -1; return c; }).ToList();
+            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = transactions };
 
-            //Where(u => (currentuser.Id == u.ApplicationUserId));
+            var result = JsonConvert.SerializeObject(currentUserData);
 
-            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = trans };
-
-            var res = JsonConvert.SerializeObject(currentUserData);
-
-            return new JsonResult(res);
+            return new JsonResult(result);
         }
 
-
-
-
-
-        [HttpGet("GetAmount")]
-        public async Task<IActionResult> GetAmount()
-        {
-
-
-            var currentuser = await GetCurrentUserAsync();
-
-
-
-            return new JsonResult(currentuser.PW);
-        }
-
-
-
-
-
-
-
+        /// <summary>
+        /// выдает список всех пользователей с клэймом "user"
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -193,22 +93,25 @@ namespace PWappServer.Controllers
             foreach (var user in users)
             {
                 if (currentuser.UserName != user.UserName)
-                userresult.Add(user.UserName);
+                    userresult.Add(user.UserName);
             }
-
 
             return new JsonResult(userresult);
         }
 
-        [HttpPost("FindByName")]
-        public async Task<IActionResult> FindByName([FromBody]string[] values)
+        /// <summary>
+        /// отправляет транзакцию выбранному пользователю, сообщает по websocket'y
+        /// кроме этого, возвращает данные о пользователя, его ammount и список транзакций
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("SendTransactionToUser")]
+        public async Task<IActionResult> SendTransactionToUser([FromBody]string[] values)
         {
-
             var Currentuser = await GetCurrentUserAsync();
 
-           // var test = Currentuser.Transactions;
+            // var test = Currentuser.Transactions;
 
-          //  var test2 = Currentuser.Transaction2;
+            //  var test2 = Currentuser.Transaction2;
             var username = values[0];
             var summ = Convert.ToInt32(values[1]);
 
@@ -221,20 +124,15 @@ namespace PWappServer.Controllers
             _context.Transactions.Add(new Transaction() { Amount = summ, SenderUsername = Currentuser.UserName, RecipientUsername = user.UserName, Date = DateTime.UtcNow });
             //     Currentuser.Transactions.Add(new Transaction() { Amount = summ, ApplicationUserId = Currentuser.Id, ApplicationUserId2 = user.Id });
 
-
             await _userManager.UpdateAsync(user);
             await _userManager.UpdateAsync(Currentuser);
 
-
-            var reciveirIds = StaticClass.Sessions.Where(u => u.UserName == user.UserName);
+            var reciveirIds = WebSocketSessions.Sessions.Where(u => u.UserName == user.UserName);
 
             foreach (var recivierId in reciveirIds)
             {
-
                 await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "booooong! MANY COOOOME");
-
             }
-
 
             _context.SaveChanges();
             _userManager.Dispose();
@@ -247,23 +145,20 @@ namespace PWappServer.Controllers
         /// </summary>
         /// <returns>IdentityResult</returns>
 
-        
-    // POST: api/identity/Create
-    [HttpPost("Create")]
+        // POST: api/identity/Create
+        [HttpPost("Create")]
         // [AllowAnonymous]
-    public async Task<IActionResult> Create([FromBody]CreateViewModel model)
-   //     public async Task<IActionResult> Create([FromBody]string[] values)
+        public async Task<IActionResult> Create([FromBody]CreateViewModel model)
+        //     public async Task<IActionResult> Create([FromBody]string[] values)
         {
-
             var userExist = await _userManager.FindByNameAsync(model.username);
             IdentityResult result;
             if (userExist != null)
             {
                 result = IdentityResult.Failed(new IdentityError() { Code = "UserExist", Description = "User already exist" });
             }
-            else {
-
-
+            else
+            {
                 var user = new ApplicationUser
                 {
                     UserName = model.username,
@@ -271,8 +166,6 @@ namespace PWappServer.Controllers
                     Name = model.name,
                     PW = 500
                 };
-
-
 
                 // Claims.
                 var claims = new IdentityUserClaim<string>[] {
@@ -289,10 +182,8 @@ namespace PWappServer.Controllers
                 // Option: enable account confirmation and password reset.
             }
 
-
             return new JsonResult(result);
-    }
-    
+        }
 
         /// <summary>
         /// Deletes a user.
@@ -314,8 +205,5 @@ namespace PWappServer.Controllers
         {
             return _userManager.GetUserAsync(HttpContext.User);
         }
-
     }
-
-
 }

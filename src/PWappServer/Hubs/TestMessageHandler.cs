@@ -52,14 +52,14 @@ namespace PWappServer.Hubs
                 Data = $"{socketId} disconnected"
             };
 
-            StaticClass.Sessions
+            WebSocketSessions.Sessions
     .RemoveAll(a => a.ConnectionId == socketId);
 
             
 
 
 
-            var reciveirId = StaticClass.Sessions.Where(u => u.UserName == socketId);
+            var reciveirId = WebSocketSessions.Sessions.Where(u => u.UserName == socketId);
 
             //   StaticClass.Sessions.RemoveAt(ConnectionInfo.(x => thingy));
 

@@ -9,7 +9,7 @@ namespace PWappServer
    
 
 
-    public static class StaticClass
+    public static class WebSocketSessions
     {
         
 
