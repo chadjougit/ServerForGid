@@ -11,7 +11,7 @@ using PWappServer.Models;
 using System;
 using WebSocketManager;
 
-//VERSION ALPHA
+//VERSION ALPHA 1.01
 
 namespace PWappServer
 {
