@@ -9,6 +9,9 @@ namespace PWappServer.Hubs
 {
     public class TestMessageHandler : WebSocketHandler
     {
+
+        private Object theLock = new Object();
+
         public TestMessageHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager)
         {
         }
@@ -42,7 +45,9 @@ namespace PWappServer.Hubs
 
         public override async Task OnDisconnected(WebSocket socket)
         {
-            var socketId = WebSocketConnectionManager.GetId(socket);
+             
+
+        var socketId = WebSocketConnectionManager.GetId(socket);
 
             await base.OnDisconnected(socket);
 
@@ -52,9 +57,11 @@ namespace PWappServer.Hubs
                 Data = $"{socketId} disconnected"
             };
 
-            WebSocketSessions.Sessions
+            lock (theLock)
+            {
+                WebSocketSessions.Sessions
     .RemoveAll(a => a.ConnectionId == socketId);
-
+            }
             
 
 

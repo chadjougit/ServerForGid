@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -36,41 +35,18 @@ namespace PWappServer
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-            /*
-            // Identity options.
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-            });
-            */
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             // Identity options.
             services.Configure<IdentityOptions>(options =>
             {
-                /*
-                // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-                */
-
                 // Password settings.
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
-
             });
 
             //   services.AddCors();
@@ -98,7 +74,6 @@ namespace PWappServer
                  .AddAspNetIdentity<ApplicationUser>(); // IdentityServer4.AspNetIdentity.
 
             services.AddWebSocketManager();
-
 
             // Add framework services.
             services.AddMvc();
@@ -136,10 +111,8 @@ namespace PWappServer
             app.UseIdentityServer();
 
             // Initializes the database.
-         //   DbInitializer.Initialize(_context);
-         //   DbInitializer.InitializeUser(_context);
-
-
+            //   DbInitializer.Initialize(_context);
+            //   DbInitializer.InitializeUser(_context);
         }
     }
 }

@@ -144,7 +144,6 @@ namespace PWappServer.Controllers
         /// Registers a new user.
         /// </summary>
         /// <returns>IdentityResult</returns>
-
         // POST: api/identity/Create
         [HttpPost("Create")]
         // [AllowAnonymous]
