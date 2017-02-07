@@ -131,7 +131,7 @@ namespace PWappServer.Controllers
 
             foreach (var recivierId in reciveirIds)
             {
-                await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "booooong! MANY COOOOME");
+                await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "new transaction alert");
             }
 
             _context.SaveChanges();
@@ -198,6 +198,17 @@ namespace PWappServer.Controllers
 
             return new JsonResult(result);
         }
+
+        [HttpPost("Test")]
+        public async Task<IActionResult> Test([FromBody]string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+
+            return new JsonResult(user) { StatusCode = (int)System.Net.HttpStatusCode.OK };
+        }
+
+
+
 
         // Add other methods.
         private Task<ApplicationUser> GetCurrentUserAsync()

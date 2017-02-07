@@ -10,7 +10,7 @@ using PWappServer.Models;
 using System;
 using WebSocketManager;
 
-//VERSION ALPHA 1.01
+//VERSION ALPHA 1.04
 
 namespace PWappServer
 {
