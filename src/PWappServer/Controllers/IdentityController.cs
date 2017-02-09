@@ -43,9 +43,9 @@ namespace PWappServer.Controllers
         }
 
         /// <summary>
-        /// отдает информацию о Ammount и связанных Transactions данного пользователя
-        /// при первом использовании необходимо получить текущий WebsocketId, чтоб его записать
-        /// в список с сессиями вебсокетов
+        /// return current user's amount and his transaction.
+        /// when user start his session, we using WebsocketId to write to session list information about this session
+        /// (his username and WebsocketId)
         /// </summary>
         /// <param name="WebsocketId"></param>
         /// <returns></returns>
@@ -55,51 +55,39 @@ namespace PWappServer.Controllers
             try
             {
                 var currentuser = await GetCurrentUserAsync();
-            //in case of logging
+                //in case of logging
 
                 //TODO: != null?
-            if (WebsocketId != "empty")
-            {
-                ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.UserName, ConnectionId = WebsocketId };
-                WebSocketSessions.Session_Start(newConnectionInfo);
-            }
+                //we writing to websocketsessions only when user start his session
+                if (WebsocketId != "empty")
+                {
+                    ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.UserName, ConnectionId = WebsocketId };
+                    WebSocketSessions.Session_Start(newConnectionInfo);
+                }
 
-
-           
-                List<Transaction> transactions = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
-                /*
-                var qry = from e in transactions
-                          let qryq = (e.Amount = 500)
-                          select qryq;
-                          */
-                transactions = transactions.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
-
-                CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = transactions };
-
-                var result = JsonConvert.SerializeObject(currentUserData);
-
-                //return new JsonResult("error vlad test") { StatusCode = (int)System.Net.HttpStatusCode.InternalServerError };
-                 return new JsonResult(result) { StatusCode = (int)System.Net.HttpStatusCode.OK };
+                return Userdata(currentuser);
             }
             //TODO: log all exceptions
             catch (Exception ex)
-            
+
             { return new JsonResult(ex) { StatusCode = (int)System.Net.HttpStatusCode.InternalServerError }; }
-            
         }
 
+        private IActionResult Userdata(ApplicationUser currentuser)
+        {
+            List<Transaction> transactions = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
+            transactions = transactions.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
 
+            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = transactions };
 
+            var result = JsonConvert.SerializeObject(currentUserData);
 
-
-
-
-
-
-
+            //return new JsonResult("error vlad test") { StatusCode = (int)System.Net.HttpStatusCode.InternalServerError };
+            return new JsonResult(result) { StatusCode = (int)System.Net.HttpStatusCode.OK };
+        }
 
         /// <summary>
-        /// выдает список всех пользователей с клэймом "user"
+        /// return al users with "user" claim 
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetAllUsers")]
@@ -122,23 +110,22 @@ namespace PWappServer.Controllers
             return new JsonResult(userresult);
         }
 
-
         /// <summary>
-        /// отправляет транзакцию выбранному пользователю, сообщает по websocket'y
-        /// кроме этого, возвращает данные о пользователя, его ammount и список транзакций
+        /// send transaction to selected user, send him message by his websocketId
+        /// return user's data
         /// </summary>
         /// <returns></returns>
         [HttpPost("SendTransactionToUser")]
         public async Task<IActionResult> SendTransactionToUser([FromBody]string[] values)
         {
-            var Currentuser = await GetCurrentUserAsync();  
+            var Currentuser = await GetCurrentUserAsync();
             var username = values[0];
             int summ = 0;
-                var user = await _userManager.FindByNameAsync(username);
+            ApplicationUser user = await _userManager.FindByNameAsync(username);
             bool res = int.TryParse(values[1], out summ);
             if (res == false || user == null)
             {
-                return new JsonResult("") { StatusCode = (int)System.Net.HttpStatusCode.BadRequest };
+                return new JsonResult("wrong input data") { StatusCode = (int)System.Net.HttpStatusCode.BadRequest };
             }
 
             //var trans = _context.Transactions.Where(u => u.ApplicationUserId == Currentuser.Id);
@@ -158,17 +145,18 @@ namespace PWappServer.Controllers
                 await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "new transaction alert");
             }
 
+            
             _context.SaveChanges();
+            /*
             _userManager.Dispose();
             _context.Dispose();
-            return new JsonResult(user);
+            */
+
+
+            //TODO возможно стоит сразу возвращать данные конкретного пользователя
+            return Userdata(Currentuser);
+           // return new JsonResult("OK") { StatusCode = (int)System.Net.HttpStatusCode.OK };
         }
-
-
-
-
-
-
 
         /// <summary>
         /// Registers a new user.
@@ -210,7 +198,8 @@ namespace PWappServer.Controllers
 
                 // Option: enable account confirmation and password reset.
             }
-
+            _userManager.Dispose();
+            _context.Dispose();
             return new JsonResult(result);
         }
 
@@ -228,17 +217,6 @@ namespace PWappServer.Controllers
 
             return new JsonResult(result);
         }
-
-        [HttpPost("Test")]
-        public async Task<IActionResult> Test([FromBody]string username)
-        {
-            var user = await _userManager.FindByNameAsync(username);
-
-            return new JsonResult(user) { StatusCode = (int)System.Net.HttpStatusCode.OK };
-        }
-
-
-
 
         // Add other methods.
         private Task<ApplicationUser> GetCurrentUserAsync()
