@@ -208,21 +208,15 @@ namespace PWappServer.Controllers
         [HttpPost("SendTransactionToUser2")]
         public async Task<IActionResult> SendTransactionToUser2([FromBody]string[] values)
         {
-            var Currentuser = await GetCurrentUserAsync();
-
-            // var test = Currentuser.Transactions;
-
-            //  var test2 = Currentuser.Transaction2;
+            var Currentuser = await GetCurrentUserAsync();  
             var username = values[0];
             int summ = 0;
-                //var summ = Convert.ToInt32(values[1]);
                 var user = await _userManager.FindByNameAsync(username);
             bool res = int.TryParse(values[1], out summ);
             if (res == false || user == null)
             {
                 return new JsonResult("") { StatusCode = (int)System.Net.HttpStatusCode.BadRequest };
             }
-
 
             //var trans = _context.Transactions.Where(u => u.ApplicationUserId == Currentuser.Id);
 
