@@ -52,39 +52,6 @@ namespace PWappServer.Controllers
         [HttpPost("GetCurrentUserData")]
         public async Task<IActionResult> GetCurrentUserData([FromBody]string WebsocketId)
         {
-            var currentuser = await GetCurrentUserAsync();
-            //in case of logging
-            if (WebsocketId != "empty")
-            {
-                ConnectionInfo newConnectionInfo = new ConnectionInfo() { UserName = currentuser.UserName, ConnectionId = WebsocketId };
-                WebSocketSessions.Session_Start(newConnectionInfo);
-            }
-
-            List<Transaction> transactions = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
-            /*
-            var qry = from e in transactions
-                      let qryq = (e.Amount = 500)
-                      select qryq;
-                      */
-            transactions = transactions.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
-
-            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = transactions };
-
-            var result = JsonConvert.SerializeObject(currentUserData);
-
-            return new JsonResult(result);
-        }
-
-        /// <summary>
-        /// отдает информацию о Ammount и связанных Transactions данного пользователя
-        /// при первом использовании необходимо получить текущий WebsocketId, чтоб его записать
-        /// в список с сессиями вебсокетов
-        /// </summary>
-        /// <param name="WebsocketId"></param>
-        /// <returns></returns>
-        [HttpPost("GetCurrentUserData2")]
-        public async Task<IActionResult> GetCurrentUserData2([FromBody]string WebsocketId)
-        {
             try
             {
                 var currentuser = await GetCurrentUserAsync();
@@ -155,6 +122,7 @@ namespace PWappServer.Controllers
             return new JsonResult(userresult);
         }
 
+
         /// <summary>
         /// отправляет транзакцию выбранному пользователю, сообщает по websocket'y
         /// кроме этого, возвращает данные о пользователя, его ammount и список транзакций
@@ -162,51 +130,6 @@ namespace PWappServer.Controllers
         /// <returns></returns>
         [HttpPost("SendTransactionToUser")]
         public async Task<IActionResult> SendTransactionToUser([FromBody]string[] values)
-        {
-            var Currentuser = await GetCurrentUserAsync();
-
-            // var test = Currentuser.Transactions;
-
-            //  var test2 = Currentuser.Transaction2;
-            var username = values[0];
-            var summ = Convert.ToInt32(values[1]);
-
-            var user = await _userManager.FindByNameAsync(username);
-
-            //var trans = _context.Transactions.Where(u => u.ApplicationUserId == Currentuser.Id);
-
-            Currentuser.PW = Currentuser.PW - summ;
-            user.PW = user.PW + summ;
-            _context.Transactions.Add(new Transaction() { Amount = summ, SenderUsername = Currentuser.UserName, RecipientUsername = user.UserName, Date = DateTime.UtcNow });
-            //     Currentuser.Transactions.Add(new Transaction() { Amount = summ, ApplicationUserId = Currentuser.Id, ApplicationUserId2 = user.Id });
-
-            await _userManager.UpdateAsync(user);
-            await _userManager.UpdateAsync(Currentuser);
-
-            var reciveirIds = WebSocketSessions.Sessions.Where(u => u.UserName == user.UserName);
-
-            foreach (var recivierId in reciveirIds)
-            {
-                await _notificationsMessageHandler.SendMessageToId(recivierId.ConnectionId, "new transaction alert");
-            }
-
-            _context.SaveChanges();
-            _userManager.Dispose();
-            _context.Dispose();
-            return new JsonResult(user);
-        }
-
-
-
-
-
-        /// <summary>
-        /// отправляет транзакцию выбранному пользователю, сообщает по websocket'y
-        /// кроме этого, возвращает данные о пользователя, его ammount и список транзакций
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost("SendTransactionToUser2")]
-        public async Task<IActionResult> SendTransactionToUser2([FromBody]string[] values)
         {
             var Currentuser = await GetCurrentUserAsync();  
             var username = values[0];
