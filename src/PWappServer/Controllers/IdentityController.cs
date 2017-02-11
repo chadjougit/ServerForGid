@@ -123,7 +123,7 @@ namespace PWappServer.Controllers
             int summ = 0;
             ApplicationUser user = await _userManager.FindByNameAsync(username);
             bool res = int.TryParse(values[1], out summ);
-            if (res == false || user == null)
+            if (res == false || user == null || Currentuser.PW - summ <= 0)
             {
                 return new JsonResult("wrong input data") { StatusCode = (int)System.Net.HttpStatusCode.BadRequest };
             }
@@ -153,7 +153,7 @@ namespace PWappServer.Controllers
             */
 
 
-            //TODO возможно стоит сразу возвращать данные конкретного пользователя
+           
             return Userdata(Currentuser);
            // return new JsonResult("OK") { StatusCode = (int)System.Net.HttpStatusCode.OK };
         }
