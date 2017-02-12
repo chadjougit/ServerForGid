@@ -8,7 +8,7 @@ namespace PWappServer.Models
     /// <summary>
     /// Class required to create a new user.
     /// </summary>
-    public class CreateViewModel
+    public class SignUpModel
     {
         public string email { get; set; }
 

@@ -36,7 +36,7 @@ namespace PWappServer.Models
                 SecurityStamp = Guid.NewGuid().ToString(),
                 TwoFactorEnabled = false,
                 UserName = "user@gmail.com",
-                PW = 500
+                Amount = 500
                 //Books = new List<Book> { new Book() { Name = "Dostoevsky" }, new Book() { Name = "Tolstoy" }, }
 
             };
@@ -94,7 +94,7 @@ namespace PWappServer.Models
                 TwoFactorEnabled = false,
                 UserName = "admin@gmail.com",
                 Name = "AdminName",
-                PW = 500
+                Amount = 500
                 //Books = new List<Book> { new Book() { Name = "Dostoevsky" }, new Book() { Name = "Tolstoy" }, }
 
             };
@@ -134,7 +134,7 @@ namespace PWappServer.Models
                 SecurityStamp = Guid.NewGuid().ToString(),
                 TwoFactorEnabled = false,
                 UserName = "user@gmail.com",
-                PW = 500
+                Amount = 500
                 //Books = new List<Book> { new Book() { Name = "Dostoevsky" }, new Book() { Name = "Tolstoy" }, }
 
             };

@@ -8,8 +8,8 @@ using PWappServer.Models;
 namespace PWappServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170109121939_MyFirstMigration6")]
-    partial class MyFirstMigration6
+    [Migration("20170212184957_MyFirstMigration")]
+    partial class MyFirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,8 @@ namespace PWappServer.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("AccessFailedCount");
+
+                    b.Property<int>("Amount");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
@@ -43,8 +45,6 @@ namespace PWappServer.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
-
-                    b.Property<int>("PW");
 
                     b.Property<string>("PasswordHash");
 

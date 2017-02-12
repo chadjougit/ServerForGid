@@ -12,7 +12,7 @@ public class ApplicationUser : IdentityUser
     /// <summary>Surname(s) or last name(s) of the End-User.</summary>
     public virtual string Name { get; set; }
 
-    public virtual int PW { get; set; }
+    public virtual int Amount { get; set; }
 
 
 

@@ -78,7 +78,7 @@ namespace PWappServer.Controllers
             List<Transaction> transactions = (_context.Transactions.Where(u => (currentuser.UserName == u.SenderUsername) || (currentuser.UserName == u.RecipientUsername))).ToList();
             transactions = transactions.Select(c => { if (currentuser.UserName == c.SenderUsername) { c.Amount = c.Amount * -1; }; return c; }).ToList();
 
-            CurrentUserData currentUserData = new CurrentUserData() { UserPw = currentuser.PW, UserTransactions = transactions };
+            CurrentUserData currentUserData = new CurrentUserData() { Amount = currentuser.Amount, Transactions = transactions };
 
             var result = JsonConvert.SerializeObject(currentUserData);
 
@@ -123,15 +123,15 @@ namespace PWappServer.Controllers
             int summ = 0;
             ApplicationUser user = await _userManager.FindByNameAsync(username);
             bool res = int.TryParse(values[1], out summ);
-            if (res == false || user == null || Currentuser.PW - summ <= 0)
+            if (res == false || user == null || Currentuser.Amount - summ <= 0)
             {
                 return new JsonResult("wrong input data") { StatusCode = (int)System.Net.HttpStatusCode.BadRequest };
             }
 
             //var trans = _context.Transactions.Where(u => u.ApplicationUserId == Currentuser.Id);
 
-            Currentuser.PW = Currentuser.PW - summ;
-            user.PW = user.PW + summ;
+            Currentuser.Amount = Currentuser.Amount - summ;
+            user.Amount = user.Amount + summ;
             _context.Transactions.Add(new Transaction() { Amount = summ, SenderUsername = Currentuser.UserName, RecipientUsername = user.UserName, Date = DateTime.UtcNow });
             //     Currentuser.Transactions.Add(new Transaction() { Amount = summ, ApplicationUserId = Currentuser.Id, ApplicationUserId2 = user.Id });
 
@@ -165,7 +165,7 @@ namespace PWappServer.Controllers
         // POST: api/identity/Create
         [HttpPost("Create")]
         // [AllowAnonymous]
-        public async Task<IActionResult> Create([FromBody]CreateViewModel model)
+        public async Task<IActionResult> Create([FromBody]SignUpModel model)
         //     public async Task<IActionResult> Create([FromBody]string[] values)
         {
             var userExist = await _userManager.FindByNameAsync(model.username);
@@ -181,7 +181,7 @@ namespace PWappServer.Controllers
                     UserName = model.username,
                     Email = model.username,
                     Name = model.name,
-                    PW = 500
+                    Amount = 500
                 };
 
                 // Claims.

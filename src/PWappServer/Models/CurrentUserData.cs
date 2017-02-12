@@ -7,7 +7,7 @@ namespace PWappServer.Models
 {
     public class CurrentUserData
     {
-        public int UserPw { get; set; }
-        public  List<Transaction> UserTransactions{ get; set; }
+        public int Amount { get; set; }
+        public  List<Transaction> Transactions{ get; set; }
     }
 }

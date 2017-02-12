@@ -23,6 +23,8 @@ namespace PWappServer.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<int>("Amount");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -42,8 +44,6 @@ namespace PWappServer.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
-
-                    b.Property<int>("PW");
 
                     b.Property<string>("PasswordHash");
 
