@@ -208,6 +208,7 @@ namespace PWappServer.Controllers
         /// </summary>
         /// <returns>IdentityResult</returns>
         // POST: api/identity/Delete
+        /*
         [HttpPost("Delete")]
         public async Task<IActionResult> Delete([FromBody]string username)
         {
@@ -217,6 +218,7 @@ namespace PWappServer.Controllers
 
             return new JsonResult(result);
         }
+        */
 
         // Add other methods.
         private Task<ApplicationUser> GetCurrentUserAsync()
