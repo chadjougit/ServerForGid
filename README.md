@@ -5,7 +5,7 @@ This is a server-side part, for client app check https://github.com/chadjougit/c
 
 to restore packages, run "dotnet restore" in cmd
 
-to start, sue "dotnet run" in cmd
+to start, use "dotnet run" in cmd
 
 ##Configuration
 to manage database connection, change value of DefaultConnection in appsettings.json
