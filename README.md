@@ -1,6 +1,8 @@
 # ServerForGid
 Angular2/ASP.Net Core "money" transactions sample
 
+MOVED TO https://github.com/VladyslavKovalov/PWappServer
+
 This is a server-side part, for client app check https://github.com/chadjougit/clientFirGid
 
 to restore packages, run "dotnet restore" in cmd
